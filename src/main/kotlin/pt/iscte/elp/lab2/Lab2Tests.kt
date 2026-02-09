@@ -1,9 +1,40 @@
 package pt.iscte.elp.lab2
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class Lab2Tests {
+
+    @Test
+    fun testBracketValidationPass() {
+        val exp = "((2+3) + 1)"
+        assertTrue(validateBrackets(exp))
+    }
+
+    @Test
+    fun testBracketValidationFail() {
+        val exp = "(2+3) + 1)"
+        assertFalse(validateBrackets(exp))
+    }
+
+    @Test
+    fun testOperationValidationPass() {
+        val exp = "((2+3) + 1)"
+        assertTrue(validateOperators(exp))
+    }
+
+    @Test
+    fun testOperationValidationFail() {
+        listOf(
+            "*(1+2)",
+            "(1+3)/",
+            "((2++3) + 1)"
+        ).forEach {
+            assertFalse(validateOperators(it), it)
+        }
+    }
 
     @Test
     fun test1() {
