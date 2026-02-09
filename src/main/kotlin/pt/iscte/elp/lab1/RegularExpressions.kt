@@ -16,10 +16,10 @@ val phoneNumber = Regex("\\(\\+\\d{1,3}\\)\\s*\\d{9}")
 
 val string = Regex("\"[^\"]*\"")
 
-val email = Regex("[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+")
+val email = Regex("[A-Za-z0-9+_.-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)* ")
 
 val positiveIntList = Regex("[0-9]+(\\s*,\\s*[0-9]+)*")
 
-val jsonNumberArray = Regex("\\[((${number.pattern})?|(${number.pattern}(,${number.pattern})+))\\]")
+val jsonNumberArray = Regex("\\[((${number.pattern})?|(${number.pattern}(,${number.pattern})+))]")
 
 

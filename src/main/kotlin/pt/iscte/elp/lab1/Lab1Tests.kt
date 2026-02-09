@@ -73,6 +73,7 @@ class Lab1Tests {
         assertTrue(email.matches("email@example"))
         assertFalse(email.matches("emailexample"))
         assertFalse(email.matches("email@@example"))
+        assertFalse(email.matches("email@example."))
     }
 
     @Test
