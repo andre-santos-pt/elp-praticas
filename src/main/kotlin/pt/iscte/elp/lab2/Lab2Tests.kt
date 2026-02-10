@@ -8,25 +8,15 @@ import org.junit.jupiter.api.Test
 class Lab2Tests {
 
     @Test
-    fun testBracketValidationPass() {
-        val exp = "((2+3) + 1)"
-        assertTrue(validateBrackets(exp))
+    fun testBracketValidation() {
+        assertTrue(validateBrackets("$((2+3) + 1)"))
+        assertFalse(validateBrackets("(2+3) + 1)"))
+        assertFalse(validateBrackets("(2+3) + (1"))
     }
 
     @Test
-    fun testBracketValidationFail() {
-        val exp = "(2+3) + 1)"
-        assertFalse(validateBrackets(exp))
-    }
-
-    @Test
-    fun testOperationValidationPass() {
-        val exp = "((2+3) + 1)"
-        assertTrue(validateOperators(exp))
-    }
-
-    @Test
-    fun testOperationValidationFail() {
+    fun testOperationValidation() {
+        assertTrue(validateOperators("((2+3) + 1)"))
         listOf(
             "*(1+2)",
             "(1+3)/",
@@ -37,23 +27,11 @@ class Lab2Tests {
     }
 
     @Test
-    fun test1() {
-        val exp = "(~(9.0) + (2^4))"
-        val result = eval(exp)
-        assertEquals(19.0, result)
+    fun testExpressionEvaluator() {
+        assertEquals(1.06, eval("((5.2 + 5.4) / 10)"))
+        assertEquals(0.75, eval("(1.0 - (2^-2))"))
+        assertEquals(6.0, eval("((3.0 / 2) * 4)"))
+        assertEquals(16.0, eval("(((12 * 0.5) + (16 * 0.25)) + (18 / 3))"))
     }
 
-    @Test
-    fun test2() {
-        val exp = "(1.0 - (2^-2))"
-        val result = eval(exp)
-        assertEquals(0.75, result)
-    }
-
-    @Test
-    fun test3() {
-        val exp = "((3.0 / 2) * 4)"
-        val result = eval(exp)
-        assertEquals(6.0, result)
-    }
 }
