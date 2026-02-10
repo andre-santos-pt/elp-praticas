@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.9.23"
+    kotlin("jvm") version "2.1.10"
 }
 
 group = "pt.iscte"
@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
+    //testImplementation(kotlin("test"))
     implementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     implementation(kotlin("script-runtime"))
     implementation("org.antlr:antlr4:4.13.2")

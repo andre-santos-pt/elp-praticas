@@ -9,7 +9,7 @@ class Lab2Tests {
 
     @Test
     fun testBracketValidation() {
-        assertTrue(validateBrackets("$((2+3) + 1)"))
+        assertTrue(validateBrackets("((2+3) + 1)"))
         assertFalse(validateBrackets("(2+3) + 1)"))
         assertFalse(validateBrackets("(2+3) + (1"))
     }
