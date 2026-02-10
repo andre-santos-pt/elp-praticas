@@ -1,10 +1,10 @@
 grammar CsvGrammar;
 
-csv: line ('\n' line)* ;
+csv: line (NEWLINE line)* ;
 
-line: element (SEPARATOR element)*;
+line: value (SEPARATOR value)*;
 
-element: (BOOLEAN | NUMBER | STRING)?;
+value: (BOOLEAN | NUMBER | STRING)?;
 
 SEPARATOR: ','|';';
 
@@ -14,4 +14,6 @@ NUMBER: '-'?[0-9]+('.'[0-9]+)?;
 
 STRING: '"'~('"'|'\n')*'"';
 
-SPACE: ' ' -> skip;
+NEWLINE: '\n'|'\r\n';
+
+SPACE: (' '|'\t') -> skip;

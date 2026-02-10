@@ -1,8 +1,8 @@
 grammar IdList;
 
-list: id (COMMA id)*;
+list: element (COMMA element)*;
 
-id: ID;
+element: ID;
 
 ID: [a-zA-Z]+;
 

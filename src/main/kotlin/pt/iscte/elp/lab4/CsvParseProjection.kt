@@ -8,7 +8,7 @@ fun CsvGrammarParser.CsvContext.toAst(): CSV =
     })
 
 fun CsvGrammarParser.LineContext.toAst() : Line =
-    Line(this.element().map {
+    Line(this.value().map {
         if(it.BOOLEAN() != null)
             Bool(it.BOOLEAN().text == "true")
         else if(it.NUMBER() != null) {
