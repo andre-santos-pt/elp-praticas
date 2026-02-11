@@ -16,8 +16,6 @@ class Lab4Tests {
            "Donald Knuth", 1938, ,true
            "Alan Turing", 1912, 1954, false
        """.trimIndent()
-
-
         val expected = CSV(listOf(
             Line(listOf(Text("Alan Kay"), Numeric(1940), None, Bool(true))),
             Line(listOf(Text("Donald Knuth"), Numeric(1938), None, Bool(true))),
@@ -28,6 +26,7 @@ class Lab4Tests {
         val csvContext = parser.csv()
         val csv = csvContext.toAst()
         assertEquals(expected, csv)
+        // ...
     }
 
 
@@ -41,7 +40,7 @@ class Lab4Tests {
             "Alan Kay", 1940,  , true
             "Donald Knuth", 1938,  , true
             "Alan Turing", 1912, 1954, false
-        
+
         """.trimIndent()
         assertEquals(expected, ast.prettyPrint())
     }
