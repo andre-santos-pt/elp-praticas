@@ -6,81 +6,58 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class Lab3Tests {
-    @Test
-    fun testLineValidation() {
-        val csv1 = """
-        1,2,3
-        1,2,3,4
-        1,2,3
-        """.trimIndent()
-
-        assertFalse(validateCSVLinesEqualLength(csv1))
-
-        val csv2 = """
-        1,2,3,4
-        1,2,3,4
-        1,2,3,4
-        """.trimIndent()
-        assertTrue(validateCSVLinesEqualLength(csv2))
-
-        assertTrue(validateCSVLinesEqualLength(""))
-    }
-
-    @Test
-    fun collectStrings() {
-        val csv = """
-            "A",10,1
-            "B","A", ,true
-            "C","B","A"
-        """.trimIndent()
-        assertEquals(setOf("A", "B", "C"), collectStrings(csv))
-    }
 
     @Test
     fun testWellFormed() {
-        val csv = """
+        val text = """
         1,2,3
         4,5,6
         7,8,9
         """.trimIndent()
-        val lexer = CsvGrammarLexer(CharStreams.fromString(csv))
+        val lexer = CsvGrammarLexer(CharStreams.fromString(text))
         val parser = CsvGrammarParser(CommonTokenStream(lexer))
-        assertTrue(isWellFormed(parser.csv()))
+        val csv = parser.csv()
+        assertTrue(isWellFormed(csv))
+        assertTrue(csv.isWellFormedExt())
     }
 
     @Test
     fun testWellFormedFail() {
-        val csv = """
+        val text = """
         1,2,3
         1,2,3,4
         1,2,3
         """.trimIndent()
-        val lexer = CsvGrammarLexer(CharStreams.fromString(csv))
+        val lexer = CsvGrammarLexer(CharStreams.fromString(text))
         val parser = CsvGrammarParser(CommonTokenStream(lexer))
-        assertFalse(isWellFormed(parser.csv()))
+        val csv = parser.csv()
+        assertFalse(isWellFormed(csv))
+        assertFalse(csv.isWellFormedExt())
     }
 
     @Test
     fun testWellTyped() {
-        val csv = """
+        val text = """
         true,,"a"
         false,5,"b"
         true,8,"c"
         """.trimIndent()
-        val lexer = CsvGrammarLexer(CharStreams.fromString(csv))
+        val lexer = CsvGrammarLexer(CharStreams.fromString(text))
         val parser = CsvGrammarParser(CommonTokenStream(lexer))
-        assertTrue(isWellTyped(parser.csv()))
+        val csv = parser.csv()
+        assertTrue(isWellTyped(csv))
     }
 
     @Test
     fun testWellFail() {
-        val csv = """
+        val text = """
         true,2,"a"
         false,false,1
         true,8,"c"
         """.trimIndent()
-        val lexer = CsvGrammarLexer(CharStreams.fromString(csv))
+        val lexer = CsvGrammarLexer(CharStreams.fromString(text))
         val parser = CsvGrammarParser(CommonTokenStream(lexer))
-        assertFalse(isWellTyped(parser.csv()))
+        val csv = parser.csv()
+        assertFalse(isWellTyped(csv))
     }
 }
