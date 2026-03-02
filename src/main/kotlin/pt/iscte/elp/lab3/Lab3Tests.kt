@@ -49,7 +49,7 @@ class Lab3Tests {
     }
 
     @Test
-    fun testWellFail() {
+    fun testWellTypedFail() {
         val text = """
         true,2,"a"
         false,false,1
@@ -59,5 +59,20 @@ class Lab3Tests {
         val parser = CsvGrammarParser(CommonTokenStream(lexer))
         val csv = parser.csv()
         assertFalse(isWellTyped(csv))
+    }
+
+
+    @Test
+    fun testExpressionCalc() {
+        assertEquals(14.0, calculateExpression("2 + 3 * 4"))
+        assertEquals(20.0, calculateExpression("(2 + 3) * 4"))
+        assertEquals(3.5, calculateExpression("7 * 0.5"))
+        assertEquals(27.2, calculateExpression("(3) ^ 3 + 0.2"))
+        assertEquals(128.0, calculateExpression("(10 - 8)^8 - 128"))
+        assertEquals(7.0, calculateExpression("2^0 + 2^1 + 2^2"))
+        assertEquals(101.0, calculateExpression("1 + ((2+3) * (4*5))"))
+        assertEquals(101.0, calculateExpression("1 + (2+3) * (4*5)"))
+        assertEquals(17.0, calculateExpression("(1 + 2 + 3 + 4) * 1.7"))
+        assertEquals(24.0, calculateExpression("1*2*3*4"))
     }
 }
