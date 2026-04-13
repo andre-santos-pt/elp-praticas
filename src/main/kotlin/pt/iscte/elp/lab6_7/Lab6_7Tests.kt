@@ -11,6 +11,8 @@ import java.io.PrintStream
 
 
 class Lab6_7Tests {
+    val NL = System.lineSeparator()
+
     val src =
         """param max
 evenSum := 0
@@ -52,9 +54,18 @@ print oddMul
         val exc = assertThrows<RuntimeException> {
             sintraRun(srcWithoutLine2, "max" to 10)
         }
-        println(exc.message)
         assertTrue(exc.message?.contains("variable not found: evenSum") == true)
+    }
 
+    @Test
+    fun `var not found error inner`() {
+        val srcWithTypo = src.lines().toMutableList().apply {
+            set(7, "evenSum := evensum + i")
+        }.joinToString("\n")
+        val exc = assertThrows<RuntimeException> {
+            sintraRun(srcWithTypo, "max" to 10)
+        }
+        assertTrue(exc.message?.contains("variable not found: evensum") == true)
     }
 
     @Test
@@ -65,7 +76,7 @@ print oddMul
         System.setOut(newOut)
 
         sintraRun(src, "max" to 10)
-        assertEquals("20\n945\n", out.toString("UTF-8"))
+        assertEquals("20${NL}945${NL}", out.toString("UTF-8"))
     }
 
     @Test
@@ -97,7 +108,7 @@ print oddMul
         System.setOut(newOut)
 
         sintraRun(srcBreak, "max" to 10)
-        assertEquals("20\n945\n", out.toString("UTF-8"))
+        assertEquals("20${NL}945${NL}", out.toString("UTF-8"))
     }
 
     @Test
@@ -114,7 +125,6 @@ if i = n {
         }
         println(exc.message)
         assertTrue(exc.message?.contains("break must be used within the scope of a while loop") == true)
-
     }
 
 }

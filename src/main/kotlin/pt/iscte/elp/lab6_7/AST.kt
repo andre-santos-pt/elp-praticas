@@ -18,15 +18,16 @@ data class Script(
     val instructions: List<Instruction>,
     val parameters: List<String> = emptyList(),
     override val range: SourceRange? = null
-): ASTNode {
+) : ASTNode {
     val isValid: Boolean get() = validate().isEmpty()
 
 
     fun validate(): List<CompilationError> {
         val errors = mutableListOf<CompilationError>()
 
-        fun List<Instruction>.checkVarDeclarations(declarations: MutableSet<String> = mutableSetOf()) {
-            forEach { inst ->
+        fun checkVarDeclarations() {
+            val declarations = mutableSetOf<String>()
+            instructions.accept { inst, _ ->
                 inst.varDependencies
                     .filter { it !in parameters && it !in declarations }
                     .forEach {
@@ -42,30 +43,35 @@ data class Script(
                     declarations.add(inst.id)
             }
         }
-        instructions.checkVarDeclarations()
+        checkVarDeclarations()
 
-        fun List<Instruction>.checkBreaks(scope: MutableList<ControlStructure> = mutableListOf()) {
-            forEach { inst ->
+        fun checkBreaks() {
+            val scope = mutableListOf<ControlStructure>()
+            instructions.accept { inst, entry ->
                 if (inst is ControlStructure) {
-                    scope.add(inst)
-                    inst.sequence.checkBreaks(scope)
-                    scope.removeLast()
-                }
-                else if(inst is Break && scope.none { it is While })
-                    errors.add(CompilationError("break must be used within the scope of a while loop", inst.range?.line ?: -1))
+                    if (entry)
+                        scope.add(inst)
+                    else
+                        scope.removeLast()
+                } else if (inst is Break && scope.none { it is While })
+                    errors.add(
+                        CompilationError(
+                            "break must be used within the scope of a while loop",
+                            inst.range?.line ?: -1
+                        )
+                    )
             }
         }
-        instructions.checkBreaks()
+        checkBreaks()
         return errors
     }
-
 
     fun toCode() =
         parameters.joinToString(postfix = "\n") { "param $it" } + instructions.toCode()
 }
 
 
-sealed interface Instruction: ASTNode {
+sealed interface Instruction : ASTNode {
     val varDependencies: List<String>
 
     fun toCode(indent: Int) = TAB.repeat(indent) + toString()
@@ -141,9 +147,8 @@ data class IfElse(
 }
 
 
-sealed interface Expression : ASTNode{
+sealed interface Expression : ASTNode {
     val varDependencies: List<String>
-    //val range: SourceRange?
 }
 
 data class Literal(
@@ -194,4 +199,21 @@ enum class Operator {
             GREATER -> ">"
         }
 }
+
+/**
+ * Visitor (padrão de desenho)
+ * @param visitor função que recebe a [Instruction] e um booleano só aplicável a [ControlStructure] que significa:
+ * - true → entrada na estrutura
+ * - false → saída da estrutura
+ */
+fun List<Instruction>.accept(visitor: (Instruction, Boolean) -> Unit): Unit =
+    forEach {
+        visitor(it, true)
+        if (it is ControlStructure) {
+            it.sequence.accept(visitor)
+            if (it is IfElse)
+                it.alternative?.accept(visitor)
+            visitor(it, false)
+        }
+    }
 
