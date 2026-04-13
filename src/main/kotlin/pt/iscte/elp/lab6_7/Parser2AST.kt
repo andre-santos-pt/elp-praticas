@@ -1,6 +1,7 @@
 package pt.iscte.elp.lab6_7
 
 import org.antlr.v4.runtime.ParserRuleContext
+import org.junit.jupiter.api.fail
 import pt.iscte.elp.lab6_7.SintraGrammarParser.*
 
 fun ParserRuleContext.toRange() = SourceRange(this.start.startIndex, this.stop.stopIndex, this.start.line)
@@ -69,3 +70,72 @@ fun ExpressionContext.toAST(): Expression =
         right.toAST(),
         this.toRange()
     )
+
+
+val NL = System.lineSeparator()
+val TAB = "    "
+
+fun Script.toSrc(): String {
+    val buffer = StringBuffer()
+    var tabs = 0
+    fun line(s: String) =
+        buffer.append(TAB.repeat(tabs) + s + NL)
+
+    parameters.forEach {
+        line("param $it")
+    }
+
+    fun Operator.toSrc() : String =
+        when (this) {
+            Operator.PLUS -> "+"
+            Operator.MINUS -> "-"
+            Operator.TIMES -> "*"
+            Operator.DIV -> "/"
+            Operator.MOD -> "%"
+            Operator.EQUAL -> "="
+            Operator.NOTEQUAL -> "<>"
+            Operator.SMALLER -> "<"
+            Operator.GREATER -> ">"
+        }
+
+    fun Expression.toSrc(): String =
+        when(this) {
+            is Literal -> value.toString()
+            is Variable -> id
+            is BinaryExpression -> "${left.toSrc()} ${operator.toSrc()} ${right.toSrc()}"
+        }
+
+    instructions.accept { inst, context ->
+        if(inst is IfElse) {
+            if(context != Context.BLOCK_END) {
+                if (context == Context.IF_START)
+                    line("if ${inst.guard.toSrc()} {")
+                else if (context == Context.ELSE_START)
+                    line("else {")
+                tabs++
+            }
+            else {
+                tabs--
+                line("}")
+            }
+        }
+        else if(inst is While) {
+            if(context.isBlockStart) {
+                line("while ${inst.guard.toSrc()} {")
+                tabs++
+            }
+            else {
+                tabs--
+                line("}")
+            }
+        }
+        else line(
+            when(inst) {
+                is Assign -> "${inst.id} := ${inst.expression.toSrc()}"
+                is Print -> "print ${inst.expression.toSrc()}"
+                else -> fail("")
+            }
+        )
+    }
+    return buffer.toString()
+}

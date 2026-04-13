@@ -22,7 +22,7 @@ fun main() {
             Print(Variable("s")) // 20
         )
     )
-    println(script.toCode())
+    println(script.toSrc())
     println(script.validate())
     val interpreter = Interpreter(script)
     interpreter.run()

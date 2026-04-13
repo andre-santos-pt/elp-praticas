@@ -41,9 +41,9 @@ print oddMul
 
         val srcWithoutComments = src.lines().toMutableList().apply {
             removeAt(5)
-        }.joinToString("\n")
+        }.joinToString(NL)
 
-        assertEquals(srcWithoutComments, ast.toCode())
+        assertEquals(srcWithoutComments, ast.toSrc())
     }
 
     @Test
@@ -125,6 +125,39 @@ if i = n {
         }
         println(exc.message)
         assertTrue(exc.message?.contains("break must be used within the scope of a while loop") == true)
+    }
+
+    @Test
+    fun testToSrc() {
+        val expected = """s := 0
+i := 0
+while i < 10 {
+    if i % 2 = 0 {
+        s := s + i
+    }
+    i := i + 1
+    print i
+}
+print s
+"""
+        val script = Script(
+            listOf(
+                Assign("s", Literal(0)),
+                Assign("i", Literal(0)),
+                While(BinaryExpression(Variable("i"), Operator.SMALLER, Literal(10)), listOf(
+                    IfElse(BinaryExpression(
+                        BinaryExpression(Variable("i"), Operator.MOD, Literal(2)),
+                        Operator.EQUAL, Literal(0)), listOf(
+                        Assign("s", BinaryExpression(Variable("s"), Operator.PLUS, Variable("i"))),
+                    )),
+                    Assign("i", BinaryExpression(Variable("i"), Operator.PLUS, Literal(1))),
+                    Print(Variable("i"))
+                )),
+                Print(Variable("s")) // 20
+            )
+        )
+        println(script.toSrc())
+        assertEquals(expected, script.toSrc())
     }
 
 }

@@ -1,11 +1,5 @@
 package pt.iscte.elp.lab6_7
 
-
-val TAB = "    "
-
-fun List<Instruction>.toCode(indent: Int = 0) =
-    joinToString("\n", postfix = "\n") { it.toCode(indent) }
-
 data class CompilationError(val message: String, val line: Int)
 
 data class SourceRange(val start: Int, val stop: Int, val line: Int)
@@ -47,11 +41,11 @@ data class Script(
 
         fun checkBreaks() {
             val scope = mutableListOf<ControlStructure>()
-            instructions.accept { inst, entry ->
+            instructions.accept { inst, context ->
                 if (inst is ControlStructure) {
-                    if (entry)
+                    if (context.isBlockStart)
                         scope.add(inst)
-                    else
+                    else if (context.isBlockEnd)
                         scope.removeLast()
                 } else if (inst is Break && scope.none { it is While })
                     errors.add(
@@ -65,16 +59,11 @@ data class Script(
         checkBreaks()
         return errors
     }
-
-    fun toCode() =
-        parameters.joinToString(postfix = "\n") { "param $it" } + instructions.toCode()
 }
 
 
 sealed interface Instruction : ASTNode {
     val varDependencies: List<String>
-
-    fun toCode(indent: Int) = TAB.repeat(indent) + toString()
 }
 
 data class Assign(
@@ -83,8 +72,6 @@ data class Assign(
 ) : Instruction {
     override val varDependencies: List<String>
         get() = expression.varDependencies
-
-    override fun toString(): String = "$id := $expression"
 }
 
 data class Print(
@@ -93,8 +80,6 @@ data class Print(
 ) : Instruction {
     override val varDependencies: List<String>
         get() = expression.varDependencies
-
-    override fun toString(): String = "print $expression"
 }
 
 
@@ -111,13 +96,7 @@ data class While(
     override val guard: Expression,
     override val sequence: List<Instruction>,
     override val range: SourceRange? = null
-) : ControlStructure {
-    override fun toCode(indent: Int): String =
-        TAB.repeat(indent) + "while $guard {\n" + sequence.toCode(indent + 1) + TAB.repeat(
-            indent
-        ) + "}"
-
-}
+) : ControlStructure
 
 interface LoopInstruction : Instruction {
     override val varDependencies: List<String>
@@ -126,26 +105,14 @@ interface LoopInstruction : Instruction {
 
 class Break(
     override val range: SourceRange?
-) : LoopInstruction {
-    override fun toString(): String = "break"
-}
+) : LoopInstruction
 
 data class IfElse(
     override val guard: Expression,
     override val sequence: List<Instruction>,
     val alternative: List<Instruction>? = null,
     override val range: SourceRange? = null
-) : ControlStructure {
-    override fun toCode(indent: Int): String =
-        TAB.repeat(indent) + "if $guard {\n" + sequence.toCode(indent + 1) +
-                TAB.repeat(indent) + "}" +
-                (alternative?.let {
-                    "\n" + TAB.repeat(indent) + "else {\n" + it.toCode(
-                        indent + 1
-                    ) + TAB.repeat(indent) + "}"
-                } ?: "")
-}
-
+) : ControlStructure
 
 sealed interface Expression : ASTNode {
     val varDependencies: List<String>
@@ -157,8 +124,6 @@ data class Literal(
 ) : Expression {
     override val varDependencies: List<String>
         get() = emptyList()
-
-    override fun toString(): String = "$value"
 }
 
 data class Variable(
@@ -167,8 +132,6 @@ data class Variable(
 ) : Expression {
     override val varDependencies: List<String>
         get() = listOf(id)
-
-    override fun toString(): String = id
 }
 
 data class BinaryExpression(
@@ -179,41 +142,40 @@ data class BinaryExpression(
 ) : Expression {
     override val varDependencies: List<String>
         get() = left.varDependencies + right.varDependencies
-
-    override fun toString(): String = "$left $operator $right"
 }
 
 enum class Operator {
     PLUS, MINUS, TIMES, DIV, MOD, EQUAL, NOTEQUAL, SMALLER, GREATER;
-
-    override fun toString(): String =
-        when (this) {
-            PLUS -> "+"
-            MINUS -> "-"
-            TIMES -> "*"
-            DIV -> "/"
-            MOD -> "%"
-            EQUAL -> "="
-            NOTEQUAL -> "<>"
-            SMALLER -> "<"
-            GREATER -> ">"
-        }
 }
 
-/**
- * Visitor (padrão de desenho)
- * @param visitor função que recebe a [Instruction] e um booleano só aplicável a [ControlStructure] que significa:
- * - true → entrada na estrutura
- * - false → saída da estrutura
- */
-fun List<Instruction>.accept(visitor: (Instruction, Boolean) -> Unit): Unit =
+
+
+enum class Context {
+    IF_START, WHILE_START, ELSE_START, BLOCK_END, NONE;
+
+    val isBlockStart get() = this == IF_START || this == WHILE_START || this == ELSE_START
+
+    val isBlockEnd get() = this == BLOCK_END
+}
+
+// Visitor (padrão de desenho)
+fun List<Instruction>.accept(visitor: (Instruction, Context) -> Unit): Unit =
     forEach {
-        visitor(it, true)
-        if (it is ControlStructure) {
+        if (it is IfElse) {
+            visitor(it, Context.IF_START)
             it.sequence.accept(visitor)
-            if (it is IfElse)
-                it.alternative?.accept(visitor)
-            visitor(it, false)
+            visitor(it, Context.BLOCK_END)
+            if (it.alternative != null) {
+                visitor(it, Context.ELSE_START)
+                it.alternative.accept(visitor)
+                visitor(it, Context.BLOCK_END)
+            }
         }
+        else if (it is While) {
+            visitor(it, Context.WHILE_START)
+            it.sequence.accept(visitor)
+            visitor(it, Context.BLOCK_END)
+        } else
+            visitor(it, Context.NONE)
     }
 
