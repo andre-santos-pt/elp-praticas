@@ -45,7 +45,7 @@ CLOSE: ')';
 
 
 OPERATORMUL: '*'|'/'|'%';
-OPERATORREL: '<'|'>'|'='|'<>';
+OPERATORREL: '<'|'<='|'>'|'>='|'='|'<>';
 
 ADD: '+';
 MINUS: '-';

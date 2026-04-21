@@ -3,11 +3,15 @@ package pt.iscte.elp.lab6_7
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 
-fun sintraRun(src: String, vararg args: Pair<String, Int>) {
+fun sintraAST(src: String): Script {
     val lexer = SintraGrammarLexer(CharStreams.fromString(src))
     val parser = SintraGrammarParser(CommonTokenStream(lexer))
     val parseTree = parser.script()
-    val ast = parseTree.toAST()
+    return parseTree.toAST()
+}
+
+fun sintraRun(src: String, vararg args: Pair<String, Int>) {
+    val ast = sintraAST(src)
     val errors = ast.validate()
     if(errors.isEmpty())
         Interpreter(ast).run(*args)

@@ -87,7 +87,9 @@ class Interpreter(val script: Script) {
             Operator.EQUAL -> (leftVal == rightVal).toInt()
             Operator.NOTEQUAL -> (leftVal != rightVal).toInt()
             Operator.SMALLER -> (leftVal < rightVal).toInt()
+            Operator.SMALLER_EQ -> (leftVal <= rightVal).toInt()
             Operator.GREATER -> (leftVal > rightVal).toInt()
+            Operator.GREATER_EQ -> (leftVal >= rightVal).toInt()
         }
     }
 }

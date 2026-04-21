@@ -98,7 +98,7 @@ data class While(
     override val range: SourceRange? = null
 ) : ControlStructure
 
-interface LoopInstruction : Instruction {
+sealed interface LoopInstruction : Instruction {
     override val varDependencies: List<String>
         get() = emptyList()
 }
@@ -145,7 +145,13 @@ data class BinaryExpression(
 }
 
 enum class Operator {
-    PLUS, MINUS, TIMES, DIV, MOD, EQUAL, NOTEQUAL, SMALLER, GREATER;
+    PLUS, MINUS, TIMES, DIV, MOD, EQUAL, NOTEQUAL, SMALLER, SMALLER_EQ, GREATER, GREATER_EQ;
+
+    val isArithmetic: Boolean
+        get() = this == PLUS || this == MINUS || this == TIMES || this == DIV || this == MOD
+
+    val isRelational: Boolean
+        get() = !isArithmetic
 }
 
 

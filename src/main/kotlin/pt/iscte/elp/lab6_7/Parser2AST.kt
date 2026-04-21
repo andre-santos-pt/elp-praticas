@@ -53,7 +53,9 @@ fun String.toOperator(): Operator =
         "=" -> Operator.EQUAL
         "<>" -> Operator.NOTEQUAL
         "<" -> Operator.SMALLER
+        "<=" -> Operator.SMALLER_EQ
         ">" -> Operator.GREATER
+        ">=" -> Operator.GREATER_EQ
         else -> throw IllegalArgumentException("Unknown operator $this")
     }
 
@@ -95,7 +97,9 @@ fun Script.toSrc(): String {
             Operator.EQUAL -> "="
             Operator.NOTEQUAL -> "<>"
             Operator.SMALLER -> "<"
+            Operator.SMALLER_EQ -> "<="
             Operator.GREATER -> ">"
+            Operator.GREATER_EQ -> ">="
         }
 
     fun Expression.toSrc(): String =
